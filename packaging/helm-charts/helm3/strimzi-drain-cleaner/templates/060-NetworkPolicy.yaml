@@ -1,0 +1,30 @@
+{{- $from := (default dict .Values.networkPolicy).webhookIngressFrom -}}
+{{- if not (or (kindIs "invalid" $from) (kindIs "slice" $from)) -}}
+{{- fail "networkPolicy.webhookIngressFrom must be null or a list of NetworkPolicyPeer entries" -}}
+{{- end -}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: strimzi-drain-cleaner
+  labels:
+    {{- include "strimzi-drain-cleaner.labels" . | nindent 4 }}
+  namespace: {{ default .Release.Namespace .Values.namespace.name }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "strimzi-drain-cleaner.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+  # Kubelet probes on port 8080 are covered by the local-node traffic exception.
+  {{- if and (kindIs "slice" $from) (not $from) }}
+  ingress: []
+  {{- else }}
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 8443
+      {{- with $from }}
+      from:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  {{- end }}

@@ -3,7 +3,7 @@ release:
   name: strimzi-drain-cleaner
   namespace: strimzi-drain-cleaner
 templates:
-  - 070-ValidatingWebhookConfiguration.yaml
+  - 080-ValidatingWebhookConfiguration.yaml
 tests:
   - it: should render the ValidatingWebhookConfiguration with the default name
     asserts:

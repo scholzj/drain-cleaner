@@ -54,7 +54,7 @@ After you have generated the certificates you need, update the installation file
 This procedure assumes that you used the previous procedure to generate the certificate files.
 If you generated your certificates in a different way or on a different path, you should update the path in the commands.
 
-1) Edit the `caBundle` field in the [`070-ValidatingWebhookConfiguration.yaml`](070-ValidatingWebhookConfiguration.yaml) installation file to specify a Base64 encoded public key of your CA.
+1) Edit the `caBundle` field in the [`080-ValidatingWebhookConfiguration.yaml`](080-ValidatingWebhookConfiguration.yaml) installation file to specify a Base64 encoded public key of your CA.
    You can use the `base64` utility to get the Base64 encoded public key:
    
    ```

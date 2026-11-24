@@ -44,7 +44,7 @@ public class BundleInstallation extends InstallationMethod {
                     if (file.getName().endsWith("040-Secret.yaml")) {
                         SecretBuilder secretBuilder = SecretUtils.createDrainCleanerSecret();
                         customDrainCleanerSecretBuilder.set(secretBuilder);
-                    } else if (file.getName().endsWith("070-ValidatingWebhookConfiguration.yaml")) {
+                    } else if (file.getName().endsWith("080-ValidatingWebhookConfiguration.yaml")) {
                         ValidatingWebhookConfiguration validatingWebhookConfiguration = StUtils.configFromYaml(file, ValidatingWebhookConfiguration.class);
                         // we fetch public key from strimzi-drain-cleaner Secret and then patch ValidationWebhookConfiguration.
                         validatingWebhookConfiguration.getWebhooks().stream().findFirst().get().getClientConfig().setCaBundle(customDrainCleanerSecretBuilder.get().getData().get("tls.crt"));

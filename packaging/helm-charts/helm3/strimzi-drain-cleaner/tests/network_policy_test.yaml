@@ -1,0 +1,85 @@
+suite: strimzi drain cleaner network policy
+release:
+  name: strimzi-drain-cleaner
+  namespace: strimzi-drain-cleaner
+templates:
+  - 060-NetworkPolicy.yaml
+tests:
+  - it: should allow ingress only on the webhook port without restricting egress
+    asserts:
+      - isKind:
+          of: NetworkPolicy
+      - equal:
+          path: metadata.namespace
+          value: strimzi-drain-cleaner
+      - equal:
+          path: spec
+          value:
+            podSelector:
+              matchLabels:
+                app: strimzi-drain-cleaner
+            policyTypes:
+              - Ingress
+            ingress:
+              - ports:
+                  - protocol: TCP
+                    port: 8443
+
+  - it: should restrict webhook ingress to the configured peers
+    set:
+      networkPolicy.webhookIngressFrom:
+        - ipBlock:
+            cidr: 192.0.2.10/32
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              component: kube-apiserver
+    asserts:
+      - equal:
+          path: spec.ingress
+          value:
+            - ports:
+                - protocol: TCP
+                  port: 8443
+              from:
+                - ipBlock:
+                    cidr: 192.0.2.10/32
+                - namespaceSelector:
+                    matchLabels:
+                      kubernetes.io/metadata.name: kube-system
+                  podSelector:
+                    matchLabels:
+                      component: kube-apiserver
+
+  - it: should allow no ingress through this policy when the peer list is empty
+    set:
+      networkPolicy.webhookIngressFrom: []
+    asserts:
+      - equal:
+          path: spec.policyTypes
+          value: [Ingress]
+      - equal:
+          path: spec.ingress
+          value: []
+
+  - it: should reject a peer list with an invalid type
+    set:
+      networkPolicy.webhookIngressFrom: ""
+    asserts:
+      - failedTemplate:
+          errorMessage: networkPolicy.webhookIngressFrom must be null or a list of NetworkPolicyPeer entries
+
+  - it: should select the Drain Cleaner pods in the configured namespace
+    set:
+      namespace.name: my-namespace
+      nameOverride: my-drain-cleaner
+    asserts:
+      - equal:
+          path: metadata.namespace
+          value: my-namespace
+      - equal:
+          path: spec.podSelector.matchLabels
+          value:
+            app: my-drain-cleaner

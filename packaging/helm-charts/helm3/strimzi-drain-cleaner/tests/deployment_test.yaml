@@ -3,7 +3,7 @@ release:
   name: strimzi-drain-cleaner
   namespace: strimzi-drain-cleaner
 templates:
-  - 060-Deployment.yaml
+  - 070-Deployment.yaml
 tests:
   - it: should not set the drain namespaces by default
     asserts:

@@ -62,7 +62,7 @@ helm_kubernetes_install: helm_kubernetes_template
 	$(FIND) $(CHART_RENDERED_TEMPLATES_TMP) -type f -name '*.yaml' -exec yq eval -i 'del .metadata.labels."app.kubernetes.io/version"' {} \;
 	$(FIND) $(CHART_RENDERED_TEMPLATES_TMP) -type f -name '*.yaml' -exec yq eval -i 'del .metadata.labels."app.kubernetes.io/managed-by"' {} \;
 	# Add explanation comment where the CA should be added
-	$(FIND) $(CHART_RENDERED_TEMPLATES_TMP) -type f -name '070-ValidatingWebhookConfiguration.yaml' -exec yq eval -i '.webhooks[0].clientConfig.caBundle line_comment="Add the generated certificate here"' {} \;
+	$(FIND) $(CHART_RENDERED_TEMPLATES_TMP) -type f -name '080-ValidatingWebhookConfiguration.yaml' -exec yq eval -i '.webhooks[0].clientConfig.caBundle line_comment="Add the generated certificate here"' {} \;
 	# Copying rendered template files to: $(CHART_RENDERED_TEMPLATES_KUBERNETES_INSTALL)
 	mkdir -p $(CHART_RENDERED_TEMPLATES_KUBERNETES_INSTALL)
 	$(FIND) $(CHART_RENDERED_TEMPLATES_KUBERNETES_INSTALL) -type f ! -name 'README.md' ! -name '040-Secret.yaml' -delete
@@ -86,7 +86,7 @@ helm_openshift_install: helm_openshift_template
 	$(FIND) $(CHART_RENDERED_TEMPLATES_TMP) -type f -name '*.yaml' -exec yq eval -i 'del .metadata.labels."app.kubernetes.io/version"' {} \;
 	$(FIND) $(CHART_RENDERED_TEMPLATES_TMP) -type f -name '*.yaml' -exec yq eval -i 'del .metadata.labels."app.kubernetes.io/managed-by"' {} \;
 	# Add OpenShift annotations
-	$(FIND) $(CHART_RENDERED_TEMPLATES_TMP) -type f -name '070-ValidatingWebhookConfiguration.yaml' -exec yq eval -i '.metadata.annotations."service.beta.openshift.io/inject-cabundle" = "true"' {} \;
+	$(FIND) $(CHART_RENDERED_TEMPLATES_TMP) -type f -name '080-ValidatingWebhookConfiguration.yaml' -exec yq eval -i '.metadata.annotations."service.beta.openshift.io/inject-cabundle" = "true"' {} \;
 	$(FIND) $(CHART_RENDERED_TEMPLATES_TMP) -type f -name '050-Service.yaml' -exec yq eval -i '.metadata.annotations."service.beta.openshift.io/serving-cert-secret-name" = "strimzi-drain-cleaner"' {} \;
 	# Copying rendered template files to: $(CHART_RENDERED_TEMPLATES_OPENSHIFT_INSTALL)
 	mkdir -p $(CHART_RENDERED_TEMPLATES_OPENSHIFT_INSTALL)

@@ -154,6 +154,13 @@ Follow the instructions in the `./install/kubernetes` directory to generate and 
 On Kubernetes, you can also use Helm to install Strimzi Drain Cleaner using our Helm Chart.
 The Helm Chart can be used to install it both with Cert Manager support and with your own certificates.
 
+### Network access
+
+By default, the Drain Cleaner NetworkPolicy allows ingress to the HTTPS webhook on TCP port `8443` from any source and does not restrict egress.
+To limit webhook access in a Helm installation, set [`networkPolicy.webhookIngressFrom`](packaging/helm-charts/helm3/strimzi-drain-cleaner/README.md#restricting-webhook-ingress).
+It does not allow ingress to the HTTP health check port `8080`. The kubelet's liveness and readiness probes still work because traffic from the pod's own node is exempt from NetworkPolicy.
+Your cluster's network plugin must enforce NetworkPolicy, and no other policy selecting the Drain Cleaner pods should allow ingress on `8080`, since NetworkPolicy rules are additive.
+
 ### Certificate renewals
 
 By default, the Drain Cleaner deployment is watching the Kubernetes secret with TLS certificates for changes such as certificate renewals.

@@ -213,6 +213,7 @@ For the full default configuration, check the [`values.yaml` file](./values.yaml
 | `namespace.extraLabels`            | Extra labels to add to the namespace                                                                                                                                                                             | `{}`                                                                                                                |
 | `podDisruptionBudget.create`       | Specifies whether a pod disruption budget should be created for the Drain Cleaner Pod                                                                                                                            | `false`                                                                                                             |
 | `podDisruptionBudget.minAvailable` | The minimum number of available Drain Cleaner Pods for the pod disruption budget                                                                                                                                 | `1`                                                                                                                 |
+| `networkPolicy.webhookIngressFrom` | List of Kubernetes `NetworkPolicyPeer` entries allowed to reach TCP port `8443`. `null` allows all sources; `[]` allows no ingress through this policy. | `null` |
 | `args`                             | Override the container arguments of the Drain Cleaner container                                                                                                                                                  | `[/opt/strimzi/bin/drain_cleaner_run.sh]`                                                                           |
 | `resources`                        | Configures resources for the Drain Cleaner Pod                                                                                                                                                                   | `{}`                                                                                                                |
 | `tmpDirSizeLimit`                  | Size limit for the `/tmp` emptyDir volume; empty string = no limit                                                                                                                                               | `5Mi`                                                                                                               |
@@ -241,3 +242,19 @@ Specify each parameter using the `--set key=value[,key=value]` argument to `helm
 ```bash
 $ helm install my-strimzi-drain-cleaner --set replicaCount=2 oci://quay.io/strimzi-helm/strimzi-drain-cleaner
 ```
+
+### Restricting webhook ingress
+
+By default, the bundled NetworkPolicy allows any source to reach the HTTPS webhook on TCP port `8443`.
+To restrict access, set `networkPolicy.webhookIngressFrom` in your Helm values file. For example:
+
+```yaml
+networkPolicy:
+  webhookIngressFrom:
+    - ipBlock:
+        cidr: 192.0.2.10/32
+```
+
+Replace the example CIDR with the source address range your network plugin sees for Kubernetes API server requests. This may differ from the API server's advertised address, so verify that admission requests still reach the webhook after applying the policy.
+Set `webhookIngressFrom: []` if you want the bundled policy to isolate the pods for ingress and manage webhook access through a separate policy. Kubernetes NetworkPolicies are additive, so other policies selecting these pods can still grant access.
+This setting does not change egress or the kubelet probes on port `8080`.

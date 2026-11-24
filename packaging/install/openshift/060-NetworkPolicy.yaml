@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: strimzi-drain-cleaner
+  labels:
+    app: strimzi-drain-cleaner
+  namespace: strimzi-drain-cleaner
+spec:
+  podSelector:
+    matchLabels:
+      app: strimzi-drain-cleaner
+  policyTypes:
+    - Ingress
+  # Kubelet probes on port 8080 are covered by the local-node traffic exception.
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 8443

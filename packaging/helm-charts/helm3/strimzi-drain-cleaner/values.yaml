@@ -45,6 +45,11 @@ podDisruptionBudget:
   create: false
   minAvailable: 1
 
+networkPolicy:
+  # Sources allowed to reach the HTTPS webhook on port 8443, as Kubernetes NetworkPolicyPeer entries.
+  # null allows all sources; [] allows no ingress through this policy.
+  webhookIngressFrom: null
+
 args:
   - /opt/strimzi/bin/drain_cleaner_run.sh
 
